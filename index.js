@@ -3,7 +3,7 @@ var config = require("./config.json");
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var keywords = require('./keywords.json');
-//var categories = require('./categories.json');
+var categories = require('./categories.json');
 var bot_token = config.SLACK_BOT_TOKEN || '';
 
 var rtm = new RtmClient(bot_token);
@@ -17,22 +17,53 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
 
 // Responds hello to peeps
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-  var channel = "#general"; //could also be a channel, group, DM, or user ID (C1234), or a username (@don)
-  var lines = message.text.match(/\w+/g);
-  console.log(lines);
-  var possibleResponses = [];
-  for (i = 0; i < lines.length; i++) {
-    var word = lines[i].toLowerCase();
-    console.log("For word: ", word, "...");
-    var responses = []
-    if (keywords[word] && keywords[word].responses) {
-        responses = keywords[word].responses;
-      }
-    }
-    console.log("...the responses are: ", responses);
-    
+  var puns = getPunResponses(message);
+  console.log(puns["direct"]);
+  console.log(puns["indirect"]);
+  if (puns["direct"].length > 0) {
+    console.log("We can make a related pun!");
+    var choice = Math.floor(Math.random() * puns["direct"].length);
+    console.log("choice:", choice);
+    rtm.sendMessage(puns["direct"][choice], message.channel);
   }
+
   /*if (message.text == "hello") {
       rtm.sendMessage("Hello <@" + message.user + ">!", message.channel);
   }*/
 });
+
+function getPunResponses(message) {
+  var lines = []
+  if (message.text) {
+    var lines = message.text.match(/\w+/g);
+  }
+  var possibleResponses = [];
+  var possibleCategories = [];
+  // First find all direct responses and related categories
+  for (i = 0; i < lines.length; i++) {
+    var word = lines[i].toLowerCase();
+    var responses = [];
+    var foundCategories = [];
+    if (keywords[word]) {
+      if (keywords[word].responses) {
+        responses = keywords[word].responses;
+      }
+      if (keywords[word].categories) {
+        foundCategories = keywords[word].categories;
+      }
+    }
+    possibleResponses.push.apply(possibleResponses, responses);
+    possibleCategories.push.apply(possibleCategories, foundCategories);
+  }
+  var relatedResponses = [];
+  // Then find all related responses
+  for (i = 0; i < possibleCategories.length; i++) {
+    category = possibleCategories[i];
+    var categoryResponses = [];
+    if (categories[category] && categories[category].responses) {
+      categoryResponses = categories[category].responses;
+    }
+    relatedResponses.push.apply(relatedResponses, categoryResponses);
+  }
+  return {"direct": possibleResponses, "indirect": relatedResponses};
+}
