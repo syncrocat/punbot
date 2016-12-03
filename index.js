@@ -37,33 +37,24 @@ function getPunResponses(message) {
   if (message.text) {
     var lines = message.text.match(/\w+/g);
   }
-  var possibleResponses = [];
-  var possibleCategories = [];
+  var directResponses = [];
+  var indirectResponses = [];
   // First find all direct responses and related categories
   for (i = 0; i < lines.length; i++) {
     var word = lines[i].toLowerCase();
-    var responses = [];
-    var foundCategories = [];
     if (keywords[word]) {
       if (keywords[word].responses) {
-        responses = keywords[word].responses;
+        directResponses.push.apply(directResponses, keywords[word].responses);
       }
       if (keywords[word].categories) {
-        foundCategories = keywords[word].categories;
+        for (j = 0; j < keywords[word].categories.length; j++) {
+          var category = keywords[word].categories[i];
+          if (categories[category] && categories[category].responses) {
+            indirectResponses.push.apply(indirectResponses, categories[category].responses);
+          }
+        }
       }
     }
-    possibleResponses.push.apply(possibleResponses, responses);
-    possibleCategories.push.apply(possibleCategories, foundCategories);
   }
-  var relatedResponses = [];
-  // Then find all related responses
-  for (i = 0; i < possibleCategories.length; i++) {
-    category = possibleCategories[i];
-    var categoryResponses = [];
-    if (categories[category] && categories[category].responses) {
-      categoryResponses = categories[category].responses;
-    }
-    relatedResponses.push.apply(relatedResponses, categoryResponses);
-  }
-  return {"direct": possibleResponses, "indirect": relatedResponses};
+  return {"direct": directResponses, "indirect": indirectResponses};
 }
