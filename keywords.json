@@ -10,14 +10,22 @@
 	},
 
 	"hand":{
-		"categories": ["body"]
+		"categories": ["body"],
+		"responses": []
 	},
 
 	"love":{
-		"categories": ["love"]
+		"categories": ["love"],
+		"responses": []
 	},
 
 	"<3":{
-		"categories": ["love"]
+		"categories": ["love"],
+		"responses": []
+	},
+
+	"chair":{
+		"categories": ["furniture"],
+		"responses": []
 	}
 }
