@@ -17,6 +17,10 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
 
 // Responds hello to peeps
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
+  if(message.text.startsWith("@punbot")){
+    handleDirectCallout(message);
+  }
+  else{
   var puns = getPunResponses(message);
   console.log(puns["direct"]);
   console.log(puns["indirect"]);
@@ -26,6 +30,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     console.log("choice:", choice);
     rtm.sendMessage(puns["direct"][choice], message.channel);
   }
+}
 
   /*if (message.text == "hello") {
       rtm.sendMessage("Hello <@" + message.user + ">!", message.channel);
@@ -57,4 +62,31 @@ function getPunResponses(message) {
     }
   }
   return {"direct": directResponses, "indirect": indirectResponses};
+}
+
+// Responds hello to peeps
+  /*if (message.text == "hello") {
+      rtm.sendMessage("Hello <@" + message.user + ">!", message.channel);
+  }*/
+
+function handleDirectCallout(message){
+  var response = message.text((?=^r\w*\s?:\s?)\w*);
+  var category = message.text((?=^c\w*\s?:\s?)\w*);
+  if(message.text(^k)){
+    var keyword = message.text((?=^k\w*\s?:\s?)\w*);
+
+    addToJsonText()
+  }
+
+}
+
+function addToJsonText(filename, jsonString){
+  var fs = require('fs');
+  fs.writeFile("/tmp/test", "Hey there!", function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("The file was saved!");
+});
 }
