@@ -5,6 +5,8 @@ var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var keywords = require('./keywords.json');
 var categories = require('./categories.json');
 var bot_token = config.SLACK_BOT_TOKEN || '';
+var PUN_CHANCE = 0.62;
+var DIRECT_PUN_CHANCE = 0.75;
 
 var rtm = new RtmClient(bot_token);
 
@@ -17,19 +19,17 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
 
 // Responds hello to peeps
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-  var puns = getPunResponses(message);
-  console.log(puns["direct"]);
-  console.log(puns["indirect"]);
-  if (puns["direct"].length > 0) {
-    console.log("We can make a related pun!");
-    var choice = Math.floor(Math.random() * puns["direct"].length);
-    console.log("choice:", choice);
-    rtm.sendMessage(puns["direct"][choice], message.channel);
+  if (Math.random() < PUN_CHANCE) {
+    var puns = getPunResponses(message);
+    if (Math.random() < DIRECT_PUN_CHANCE) {
+      var choice = Math.floor(Math.random() * puns.direct.length);
+      var response = puns.direct[choice];
+    } else {
+      var choice = Math.floor(Math.random() * puns.indirect.length);
+      var response = puns.indirect[choice];
+    }
+    rtm.sendMessage(response, message.channel);
   }
-
-  /*if (message.text == "hello") {
-      rtm.sendMessage("Hello <@" + message.user + ">!", message.channel);
-  }*/
 });
 
 function getPunResponses(message) {
@@ -47,6 +47,7 @@ function getPunResponses(message) {
         directResponses.push.apply(directResponses, keywords[word].responses);
       }
       if (keywords[word].categories) {
+        // For each category, look up all appropriate responses
         for (j = 0; j < keywords[word].categories.length; j++) {
           var category = keywords[word].categories[i];
           if (categories[category] && categories[category].responses) {
