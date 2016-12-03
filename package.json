@@ -1,0 +1,26 @@
+{
+  "name": "punbot",
+  "version": "1.0.0",
+  "description": "Makes puns",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syncrocat/punbot.git"
+  },
+  "keywords": [
+    "pun"
+  ],
+  "author": "Grant Zeidler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syncrocat/punbot/issues"
+  },
+  "homepage": "https://github.com/syncrocat/punbot#readme",
+  "dependencies": {
+    "@slack/client": "^3.6.1"
+  },
+  "devDependencies": {}
+}
