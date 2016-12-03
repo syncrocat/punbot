@@ -1,0 +1,13 @@
+{
+	"body":{
+		"responses": ["Is there an opportunity for puns _*afoot*_?","I think my puns deserve a _*hand*_"],
+	},
+
+	"love":{
+		"responses": ["My love for you is _*pun*_-conditional"],
+	},
+
+	"furniture":{
+		"responses": ["You're _*chair*_-ing me apart Lisa!"]
+	}
+}
