@@ -7,6 +7,10 @@ var categories = require('./categories.json');
 var bot_token = config.SLACK_BOT_TOKEN || '';
 var PUN_CHANCE = 0.62;
 var DIRECT_PUN_CHANCE = 0.75;
+var inspect = require('unist-util-inspect');
+var English = require('parse-english');
+var natural = require('natural');
+var rhyme = require('rhyme');
 
 var rtm = new RtmClient(bot_token);
 
@@ -14,29 +18,38 @@ rtm.start();
 
 // The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload if you want to cache it
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
-  console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
+  console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}`);
 });
 
 // Responds hello to peeps
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-  if (Math.random() < PUN_CHANCE) {
-    var puns = getPunResponses(message);
-    if (Math.random() < DIRECT_PUN_CHANCE) {
-      var choice = Math.floor(Math.random() * puns.direct.length);
-      var response = puns.direct[choice];
+  if (message.text) {
+    var response = false;
+    //rhymes("test", "two");
+    //phoneticTest(message.text);
+    //parseSentence(message.text);
+    if (Math.random() < PUN_CHANCE) {
+      var puns = getPunResponses(message.text);
+      if (Math.random() < DIRECT_PUN_CHANCE) {
+        console.log("Direct pun:", PUN_CHANCE * DIRECT_PUN_CHANCE, "in 1 chance");
+        var choice = Math.floor(Math.random() * puns.direct.length);
+        response = puns.direct[choice];
+      } else {
+        console.log("Indirect pun:", PUN_CHANCE * (1 - DIRECT_PUN_CHANCE), "in 1 chance");
+        var choice = Math.floor(Math.random() * puns.indirect.length);
+        response = puns.indirect[choice];
+      }
+      if (response) {
+        rtm.sendMessage(response, message.channel);
+      }
     } else {
-      var choice = Math.floor(Math.random() * puns.indirect.length);
-      var response = puns.indirect[choice];
+      console.log("Not really feeling it");
     }
-    rtm.sendMessage(response, message.channel);
   }
 });
 
-function getPunResponses(message) {
-  var lines = []
-  if (message.text) {
-    var lines = message.text.match(/\w+/g);
-  }
+function getPunResponses(text) {
+  var lines = text.match(/\w+/g) || [];
   var directResponses = [];
   var indirectResponses = [];
   // First find all direct responses and related categories
@@ -67,3 +80,42 @@ function requestPun() {
   var rand = random(0, length(punsByRequest));
   rtm.sendMessage(array[rand], message.channel);
 }
+
+// function parseSentence(text) {
+//   var parsedText = new English().parse(text);
+//   console.log(inspect(parsedText));
+// }
+//
+// function phoneticTest(text) {
+//   var words = text.match(/\w+/g) || [];
+//   console.log(words);
+//   console.log(natural.Metaphone.compare(words[0], words[1]));
+//   for (i = 0; i < words.length; i++) {
+//     for (j = i + 1; j < words.length; j++) {
+//       soundAlike(words[i], words[j]);
+//     }
+//   }
+// }
+//
+// function soundAlike(wordA, wordB) {
+//   while (wordA.length > 0 && wordB.length > 0) {
+//     if (natural.Metaphone.compare(wordA, wordB)) {
+//       console.log(wordA, "sounds like", wordB);
+//       return true;
+//     } else {
+//       if (wordB.length > wordA.length) {
+//         wordB = wordB.slice(1, wordB.length);
+//       } else {
+//         wordA = wordA.slice(1, wordA.length);
+//       }
+//     }
+//   }
+//   return false;
+// }
+//
+// function rhymes(wordA, wordB) {
+//   //console.log(rhyme(wordA));
+//   rhyme(function (r) {
+//       console.log(r.rhyme('bed'));
+//   });
+// }
