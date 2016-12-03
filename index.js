@@ -59,3 +59,11 @@ function getPunResponses(message) {
   }
   return {"direct": directResponses, "indirect": indirectResponses};
 }
+
+
+function requestPun() {
+  var fs = require('fs');
+  var array = fs.readFileSync('file.txt').toString().split("\n");
+  var rand = random(0, length(punsByRequest));
+  rtm.sendMessage(array[rand], message.channel);
+}
