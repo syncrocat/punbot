@@ -85,11 +85,11 @@ function getPunResponses(text) {
 
 function handleDirectCallout(message){
   if(message.text.match(/(?=\sr\w*\s?:\s?)\w*\s*/) && message.text.match(/(?=\sc\w*\s?:\s?)\w*/)){
-  var response = (message.text.match(/(?=r:)(\w*\s)*/))[0];
-  var category = (message.text.match(/(?=\sc\w*\s?:\s?)\w*/))[0];
+  var response = (message.text.match(/([^(r:)]+).*(?=c:)/))[0];
+  var category = (message.text.match(/([^(c:)]+)\w*/))[0];
   console.log("RESPONSE" + response +"GODFOK");
   if(message.text.match(/\sk/)){
-    var keyword = (message.text.match(/(?=\sk\w*\s?:\s?)\w*/))[0];
+    var keyword = (message.text.match(/([^(k:)]+)\w*/))[0];
     var j = {"categories":[category],"response":[response]};
     addToJsonText("keywords.json", keyword, j);
     console.log("keywords has been added");
