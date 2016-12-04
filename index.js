@@ -17,7 +17,9 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
 
 // Responds hello to peeps
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-  if(message.text.startsWith("@punbot")){
+  var botID = "U3AU23QNB";
+  var direct_mention = new RegExp('^\<\@' + botID + '\>', 'i');
+  if( message.text.includes(botID)){
     handleDirectCallout(message);
   }
   else{
@@ -70,23 +72,42 @@ function getPunResponses(message) {
   }*/
 
 function handleDirectCallout(message){
-  var response = message.text((?=^r\w*\s?:\s?)\w*);
-  var category = message.text((?=^c\w*\s?:\s?)\w*);
-  if(message.text(^k)){
-    var keyword = message.text((?=^k\w*\s?:\s?)\w*);
-
-    addToJsonText()
+  if(message.text.match(/(?=\sr\w*\s?:\s?)\w*\s*/) && message.text.match(/(?=\sc\w*\s?:\s?)\w*/)){
+  var response = (message.text.match(/(?=r:)(\w*\s)*/))[0];
+  var category = (message.text.match(/(?=\sc\w*\s?:\s?)\w*/))[0];
+  console.log("RESPONSE" + response +"GODFOK");
+  if(message.text.match(/\sk/)){
+    var keyword = (message.text.match(/(?=\sk\w*\s?:\s?)\w*/))[0];
+    var j = {"categories":[category],"response":[response]};
+    addToJsonText("keywords.json", keyword, j);
+    console.log("keywords has been added");
   }
-
+  var j = {"responses":[response]};
+  addToJsonText("categories.json", category, j);
+}
+else{
+  rtm.sendMessage("sorry, I didn't understand you. What pun do I save?", message.channel);
+}
 }
 
-function addToJsonText(filename, jsonString){
+function addToJsonText(filename, title, jsonString){
   var fs = require('fs');
-  fs.writeFile("/tmp/test", "Hey there!", function(err) {
-    if(err) {
-        return console.log(err);
-    }
+  fs.readFile(filename, (err, data) => {
 
-    console.log("The file was saved!");
-});
+    var theD = JSON.parse(data);
+    theD[title] = jsonString;
+
+    fs.writeFile(filename, JSON.stringify(theD), function(err) {
+      if(err) {
+          return console.log(err);
+      }
+
+      console.log("The file was saved!");
+  });
+
+  if (err) throw err;
+  console.log(data);
+  });
+
+
 }
